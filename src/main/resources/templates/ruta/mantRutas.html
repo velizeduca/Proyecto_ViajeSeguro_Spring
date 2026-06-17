@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Mantenimiento de Rutas</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<!-- DataTables -->
+<link rel="stylesheet"
+href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+
+</head>
+
+<body>
+
+<div class="container-fluid mt-4">
+
+	<div class="card shadow">
+
+		<div class="card-header bg-primary text-white">
+			<h3 class="mb-0">Mantenimiento de Rutas</h3>
+		</div>
+
+		<div class="card-body">
+
+			<div class="alert alert-info">
+				<span th:text="${mensaje}"></span>
+			</div>
+
+			<div class="d-flex justify-content-between mb-3">
+
+				<button id="btnNuevo"
+						class="btn btn-success"
+						data-bs-toggle="modal"
+						data-bs-target="#modalRuta">
+
+					<i class="bi bi-plus-circle"></i>
+					Nueva Ruta
+
+				</button>
+
+			</div>
+
+			<div id="mensajeExito"
+			     th:if="${mensajeExito}"
+			     class="alert alert-success alert-dismissible fade show">
+
+				<span th:text="${mensajeExito}"></span>
+
+				<button type="button"
+				        class="btn-close"
+				        data-bs-dismiss="alert">
+				</button>
+
+			</div>
+
+			<table id="tablaRuta"
+				   class="table table-bordered table-hover table-striped">
+
+				<thead class="table-dark">
+
+					<tr>
+						<th>ID</th>
+						<th>Ciudad Origen</th>
+						<th>Ciudad Destino</th>
+						<th>Duración (Horas)</th>
+						<th>Precio</th>
+						<th>Estado</th>
+						<th>Acciones</th>
+					</tr>
+
+				</thead>
+
+				<tbody>
+
+					<tr th:each="r : ${rutas}">
+
+						<td th:text="${r.idRuta}"></td>
+
+						<td th:text="${r.ciudadOrigen.nombre}"></td>
+
+						<td th:text="${r.ciudadDestino.nombre}"></td>
+
+						<td th:text="${r.duracionHoras}"></td>
+
+						<td th:text="${r.precio}"></td>
+
+						<td>
+
+							<span class="badge"
+								th:classappend="${r.estado=='ACTIVO'} ?
+												' bg-success' :
+												' bg-danger'"
+								th:text="${r.estado}">
+							</span>
+
+						</td>
+
+						<td>
+
+							<button class="btn btn-warning btn-sm btnEditar"
+									th:data-id="${r.idRuta}">
+
+								<i class="bi bi-pencil-square"></i>
+
+							</button>
+
+							<button class="btn btn-danger btn-sm btnEliminar"
+									th:data-id="${r.idRuta}">
+
+								<i class="bi bi-trash"></i>
+
+							</button>
+
+						</td>
+
+					</tr>
+
+				</tbody>
+
+			</table>
+
+		</div>
+
+	</div>
+
+</div>
+
+<!-- JQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- DataTables -->
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+
+$(document).ready(function() {
+
+	$('#tablaRuta').DataTable({
+
+		language : {
+			url : 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json'
+		}
+
+	});
+
+});
+
+$(document).on("click", ".btnEditar", function() {
+
+	let id = $(this).data("id");
+
+	$("#tituloModal").text("Editar Ruta");
+
+	$("#frmRuta").attr("action",
+			"/gestionruta/actualizar");
+
+	$.get("/gestionruta/buscar/" + id, function(data) {
+
+		$("#idRuta").val(data.idRuta);
+
+		$("#ciudadOrigen")
+				.val(data.ciudadOrigen.idCiudad);
+
+		$("#ciudadDestino")
+				.val(data.ciudadDestino.idCiudad);
+
+		$("#duracionHoras")
+				.val(data.duracionHoras);
+
+		$("#precio")
+				.val(data.precio);
+
+		$("#estado")
+				.val(data.estado);
+
+		$("#modalRuta").modal("show");
+
+	});
+
+});
+
+$("#btnNuevo").click(function() {
+
+	$("#tituloModal")
+			.text("Registrar Ruta");
+
+	$("#frmRuta")
+			.attr("action",
+					"/gestionruta/registrar");
+
+	$("#idRuta").val(0);
+
+	$("#ciudadOrigen").val("0");
+
+	$("#ciudadDestino").val("0");
+
+	$("#duracionHoras").val("");
+
+	$("#precio").val("");
+
+	$("#estado").val("ACTIVO");
+
+});
+
+$(document).on("click", ".btnEliminar", function() {
+
+	let id = $(this).data("id");
+
+	if(confirm("¿Desea desactivar esta ruta?")) {
+
+		window.location =
+			"/gestionruta/desactivar/" + id;
+
+	}
+
+});
+
+</script>
+
+<!-- MODAL -->
+
+<div class="modal fade"
+	 id="modalRuta"
+	 tabindex="-1">
+
+	<div class="modal-dialog modal-lg">
+
+		<div class="modal-content">
+
+			<form id="frmRuta"
+				  th:action="@{/gestionruta/registrar}"
+				  th:object="${ruta}"
+				  method="post">
+
+				<input type="hidden"
+					   id="idRuta"
+					   th:field="*{idRuta}">
+
+				<div class="modal-header">
+
+					<h5 class="modal-title"
+						id="tituloModal">
+
+						Registrar Ruta
+
+					</h5>
+
+					<button type="button"
+							class="btn-close"
+							data-bs-dismiss="modal">
+					</button>
+
+				</div>
+
+				<div class="modal-body">
+
+					<div class="row">
+
+						<div class="col-md-6 mb-3">
+
+							<label>Ciudad Origen</label>
+
+							<select id="ciudadOrigen"
+									class="form-select"
+									th:field="*{ciudadOrigen.idCiudad}">
+
+								<option value="0">
+									Seleccione Ciudad
+								</option>
+
+								<option
+									th:each="c : ${ciudades}"
+									th:value="${c.idCiudad}"
+									th:text="${c.nombre}">
+								</option>
+
+							</select>
+
+						</div>
+
+						<div class="col-md-6 mb-3">
+
+							<label>Ciudad Destino</label>
+
+							<select id="ciudadDestino"
+									class="form-select"
+									th:field="*{ciudadDestino.idCiudad}">
+
+								<option value="0">
+									Seleccione Ciudad
+								</option>
+
+								<option
+									th:each="c : ${ciudades}"
+									th:value="${c.idCiudad}"
+									th:text="${c.nombre}">
+								</option>
+
+							</select>
+
+						</div>
+
+						<div class="col-md-6 mb-3">
+
+							<label>Duración (Horas)</label>
+
+							<input id="duracionHoras"
+								   type="number"
+								   step="0.1"
+								   class="form-control"
+								   th:field="*{duracionHoras}">
+
+						</div>
+
+						<div class="col-md-6 mb-3">
+
+							<label>Precio</label>
+
+							<input id="precio"
+								   type="number"
+								   step="0.01"
+								   class="form-control"
+								   th:field="*{precio}">
+
+						</div>
+
+						<div class="col-md-6 mb-3">
+
+							<label>Estado</label>
+
+							<select id="estado"
+									class="form-select"
+									th:field="*{estado}">
+
+								<option value="ACTIVO">
+									ACTIVO
+								</option>
+
+								<option value="INACTIVO">
+									INACTIVO
+								</option>
+
+							</select>
+
+						</div>
+
+					</div>
+
+				</div>
+
+				<div class="modal-footer">
+
+					<button type="button"
+							class="btn btn-secondary"
+							data-bs-dismiss="modal">
+
+						Cerrar
+
+					</button>
+
+					<button type="submit"
+							class="btn btn-primary">
+
+						Guardar
+
+					</button>
+
+				</div>
+
+			</form>
+
+		</div>
+
+	</div>
+
+</div>
+
+<script>
+
+setTimeout(function() {
+
+	let mensaje =
+		document.getElementById("mensajeExito");
+
+	if(mensaje){
+
+		let alerta =
+			new bootstrap.Alert(mensaje);
+
+		alerta.close();
+
+	}
+
+}, 3000);
+
+</script>
+
+</body>
+</html>

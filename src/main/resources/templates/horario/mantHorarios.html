@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Mantenimiento de Horarios</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<!-- DataTables -->
+<link rel="stylesheet"
+href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+
+</head>
+
+<body>
+
+<div class="container-fluid mt-4">
+
+	<div class="card shadow">
+
+		<div class="card-header bg-primary text-white">
+			<h3 class="mb-0">Mantenimiento de Horarios</h3>
+		</div>
+
+		<div class="card-body">
+
+			<div class="alert alert-info">
+				<span th:text="${mensaje}"></span>
+			</div>
+
+			<div class="d-flex justify-content-between mb-3">
+
+				<button id="btnNuevo"
+						class="btn btn-success"
+						data-bs-toggle="modal"
+						data-bs-target="#modalHorario">
+
+					<i class="bi bi-plus-circle"></i>
+					Nuevo Horario
+
+				</button>
+
+			</div>
+
+			<div id="mensajeExito"
+			     th:if="${mensajeExito}"
+			     class="alert alert-success alert-dismissible fade show">
+
+				<span th:text="${mensajeExito}"></span>
+
+				<button type="button"
+				        class="btn-close"
+				        data-bs-dismiss="alert">
+				</button>
+
+			</div>
+
+			<table id="tablaHorario"
+				   class="table table-bordered table-hover table-striped">
+
+				<thead class="table-dark">
+
+					<tr>
+						<th>ID</th>
+						<th>Bus</th>
+						<th>Ruta</th>
+						<th>Fecha Salida</th>
+						<th>Hora Salida</th>
+						<th>Estado</th>
+						<th>Acciones</th>
+					</tr>
+
+				</thead>
+
+				<tbody>
+
+					<tr th:each="h : ${horarios}">
+
+						<td th:text="${h.idHorario}"></td>
+
+						<td th:text="${h.bus.placa}"></td>
+
+						<td>
+							<span th:text="${h.ruta.ciudadOrigen.nombre}"></span>
+							-
+							<span th:text="${h.ruta.ciudadDestino.nombre}"></span>
+						</td>
+
+						<td th:text="${h.fechaSalida}"></td>
+
+						<td th:text="${h.horaSalida}"></td>
+
+						<td>
+							<span class="badge"
+								th:classappend="${h.estado=='ACTIVO'} ?
+								' bg-success' : ' bg-danger'"
+								th:text="${h.estado}">
+							</span>
+						</td>
+
+						<td>
+
+							<button class="btn btn-warning btn-sm btnEditar"
+									th:data-id="${h.idHorario}">
+								<i class="bi bi-pencil-square"></i>
+							</button>
+
+							<button class="btn btn-danger btn-sm btnEliminar"
+									th:data-id="${h.idHorario}">
+								<i class="bi bi-trash"></i>
+							</button>
+
+						</td>
+
+					</tr>
+
+				</tbody>
+
+			</table>
+
+		</div>
+
+	</div>
+
+</div>
+
+<!-- JQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- DataTables -->
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+
+$(document).ready(function() {
+
+	$('#tablaHorario').DataTable({
+
+		language : {
+			url : 'https://cdn.datatables.net/plug-ins/1.13.8/i18n/es-ES.json'
+		}
+
+	});
+
+});
+
+$(document).on("click", ".btnEditar", function() {
+
+	let id = $(this).data("id");
+
+	$("#tituloModal").text("Editar Horario");
+
+	$("#frmHorario")
+			.attr("action",
+					"/gestionhorario/actualizar");
+
+	$.get("/gestionhorario/buscar/" + id, function(data) {
+
+		$("#idHorario").val(data.idHorario);
+
+		$("#bus").val(data.bus.idBus);
+
+		$("#ruta").val(data.ruta.idRuta);
+
+		$("#fechaSalida").val(data.fechaSalida);
+
+		$("#horaSalida").val(data.horaSalida);
+
+		$("#estado").val(data.estado);
+
+		$("#modalHorario").modal("show");
+
+	});
+
+});
+
+$("#btnNuevo").click(function() {
+
+	$("#tituloModal").text("Registrar Horario");
+
+	$("#frmHorario")
+			.attr("action",
+					"/gestionhorario/registrar");
+
+	$("#idHorario").val(0);
+
+	$("#bus").val("0");
+
+	$("#ruta").val("0");
+
+	$("#fechaSalida").val("");
+
+	$("#horaSalida").val("");
+
+	$("#estado").val("ACTIVO");
+
+});
+
+$(document).on("click", ".btnEliminar", function() {
+
+	let id = $(this).data("id");
+
+	if(confirm("¿Desea desactivar este horario?")) {
+
+		window.location =
+				"/gestionhorario/desactivar/" + id;
+
+	}
+
+});
+
+</script>
+
+<!-- MODAL -->
+
+<div class="modal fade"
+	 id="modalHorario"
+	 tabindex="-1">
+
+	<div class="modal-dialog modal-lg">
+
+		<div class="modal-content">
+
+			<form id="frmHorario"
+				  th:action="@{/gestionhorario/registrar}"
+				  th:object="${horario}"
+				  method="post">
+
+				<input type="hidden"
+					   id="idHorario"
+					   th:field="*{idHorario}">
+
+				<div class="modal-header">
+
+					<h5 class="modal-title"
+						id="tituloModal">
+
+						Registrar Horario
+
+					</h5>
+
+					<button type="button"
+							class="btn-close"
+							data-bs-dismiss="modal">
+					</button>
+
+				</div>
+
+				<div class="modal-body">
+
+					<div class="row">
+
+						<div class="col-md-6 mb-3">
+
+							<label>Bus</label>
+
+							<select id="bus"
+									class="form-select"
+									th:field="*{bus.idBus}">
+
+								<option value="0">
+									Seleccione Bus
+								</option>
+
+								<option th:each="b : ${buses}"
+										th:value="${b.idBus}"
+										th:text="${b.placa}">
+								</option>
+
+							</select>
+
+						</div>
+
+						<div class="col-md-6 mb-3">
+
+							<label>Ruta</label>
+
+							<select id="ruta"
+									class="form-select"
+									th:field="*{ruta.idRuta}">
+
+								<option value="0">
+									Seleccione Ruta
+								</option>
+
+								<option th:each="r : ${rutas}"
+										th:value="${r.idRuta}"
+										th:text="${r.ciudadOrigen.nombre + ' - ' + r.ciudadDestino.nombre}">
+								</option>
+
+							</select>
+
+						</div>
+
+						<div class="col-md-6 mb-3">
+
+							<label>Fecha Salida</label>
+
+							<input id="fechaSalida"
+								   type="date"
+								   class="form-control"
+								   th:field="*{fechaSalida}">
+
+						</div>
+
+						<div class="col-md-6 mb-3">
+
+							<label>Hora Salida</label>
+
+							<input id="horaSalida"
+								   type="time"
+								   class="form-control"
+								   th:field="*{horaSalida}">
+
+						</div>
+
+						<div class="col-md-6 mb-3">
+
+							<label>Estado</label>
+
+							<select id="estado"
+									class="form-select"
+									th:field="*{estado}">
+
+								<option value="ACTIVO">ACTIVO</option>
+								<option value="INACTIVO">INACTIVO</option>
+
+							</select>
+
+						</div>
+
+					</div>
+
+				</div>
+
+				<div class="modal-footer">
+
+					<button type="button"
+							class="btn btn-secondary"
+							data-bs-dismiss="modal">
+
+						Cerrar
+
+					</button>
+
+					<button type="submit"
+							class="btn btn-primary">
+
+						Guardar
+
+					</button>
+
+				</div>
+
+			</form>
+
+		</div>
+
+	</div>
+
+</div>
+
+<script>
+
+setTimeout(function() {
+
+	let mensaje =
+		document.getElementById("mensajeExito");
+
+	if(mensaje){
+
+		let alerta =
+			new bootstrap.Alert(mensaje);
+
+		alerta.close();
+
+	}
+
+}, 3000);
+
+</script>
+
+</body>
+</html>

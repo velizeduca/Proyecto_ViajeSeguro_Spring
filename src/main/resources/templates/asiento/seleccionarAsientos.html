@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Selección de Asientos</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet">
+
+<style>
+
+.asiento{
+	width:70px;
+	height:70px;
+	margin:5px;
+	font-weight:bold;
+	font-size:18px;
+}
+
+.libre{
+	background-color:#198754;
+	color:white;
+	border:none;
+}
+
+.ocupado{
+	background-color:#dc3545;
+	color:white;
+	border:none;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container mt-4">
+
+	<div class="card shadow">
+
+		<div class="card-header bg-primary text-white">
+
+			<h2 class="text-center">
+				SELECCIÓN DE ASIENTOS
+			</h2>
+
+		</div>
+
+		<div class="card-body">
+
+			<div class="row mb-4">
+
+				<div class="col-md-3">
+
+					<label><b>Bus</b></label>
+
+					<p>
+						<span th:text="${horario.bus.marcaBus.nombre}"></span>
+						-
+						<span th:text="${horario.bus.modelo}"></span>
+					</p>
+
+				</div>
+
+				<div class="col-md-3">
+
+					<label><b>Ruta</b></label>
+
+					<p>
+						<span th:text="${horario.ruta.ciudadOrigen.nombre}"></span>
+						→
+						<span th:text="${horario.ruta.ciudadDestino.nombre}"></span>
+					</p>
+
+				</div>
+
+				<div class="col-md-3">
+
+					<label><b>Fecha</b></label>
+
+					<p th:text="${horario.fechaSalida}">
+					</p>
+
+				</div>
+
+				<div class="col-md-3">
+
+					<label><b>Hora</b></label>
+
+					<p th:text="${horario.horaSalida}">
+					</p>
+
+				</div>
+
+			</div>
+
+			<hr>
+
+			<div class="text-center mb-4">
+
+				<h4>CONDUCTOR</h4>
+
+			</div>
+
+			<div class="row">
+
+				<div class="col-md-8 offset-md-2">
+
+					<div class="d-flex flex-wrap justify-content-center">
+
+						<div th:each="a : ${asientos}">
+
+							<button type="button"
+								class="asiento libre"
+								th:text="${a.nroAsiento}">
+							</button>
+
+						</div>
+
+					</div>
+
+				</div>
+
+			</div>
+
+			<hr>
+
+			<div class="text-center">
+
+				<span class="badge bg-success">
+					Libre
+				</span>
+
+				<span class="badge bg-danger">
+					Ocupado
+				</span>
+
+			</div>
+
+		</div>
+
+	</div>
+
+</div>
+
+</body>
+</html>

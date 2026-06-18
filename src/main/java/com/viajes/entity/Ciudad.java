@@ -25,7 +25,22 @@ public class Ciudad {
     public Ciudad() {
     }
 
-    public int getIdCiudad() {
+    
+    
+    
+    
+    public Ciudad(int idCiudad, String nombre, String estado) {
+		super();
+		this.idCiudad = idCiudad;
+		this.nombre = nombre;
+		this.estado = estado;
+	}
+
+
+
+
+
+	public int getIdCiudad() {
         return idCiudad;
     }
 

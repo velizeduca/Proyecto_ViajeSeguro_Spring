@@ -92,4 +92,19 @@ public class Cliente {
 	public void setEstado(String estado) {
 		this.estado = estado;
 	}
+
+	public Cliente(int idCliente, String dni, String nombres, String apellidos, String telefono, String correo,
+			String estado) {
+		super();
+		this.idCliente = idCliente;
+		this.dni = dni;
+		this.nombres = nombres;
+		this.apellidos = apellidos;
+		this.telefono = telefono;
+		this.correo = correo;
+		this.estado = estado;
+	}
+	
+	
+	
 }

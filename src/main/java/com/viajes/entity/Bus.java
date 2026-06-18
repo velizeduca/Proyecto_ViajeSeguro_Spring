@@ -87,4 +87,17 @@ public class Bus {
     public void setEstado(String estado) {
         this.estado = estado;
     }
+
+	public Bus(int idBus, MarcaBus marcaBus, String modelo, String placa, int capacidad, String estado) {
+		super();
+		this.idBus = idBus;
+		this.marcaBus = marcaBus;
+		this.modelo = modelo;
+		this.placa = placa;
+		this.capacidad = capacidad;
+		this.estado = estado;
+	}
+    
+    
+    
 }
